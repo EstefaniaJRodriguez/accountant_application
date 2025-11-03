@@ -1,1 +1,0 @@
-# accountant_application
