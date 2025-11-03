@@ -12,7 +12,7 @@ import altaRoutes from './routes/altaMonotributo.js';
 import bajaRoutes from './routes/bajaMonotributo.js';
 import recategoRoutes from './routes/recatego.js';
 import adminRoutes from './routes/adminRoutes.js';
-import pagosRouter from "./routes/pagosRoutes.js";
+import pagosRoutes from "./routes/pagosRoutes.js";
 import consultaRoutes from "./routes/emailConsultaRoutes.js";
 import monotributoRoutes from "./routes/calcularMonotributoRoutes.js";
 
@@ -66,7 +66,7 @@ app.use('/api/alta', altaRoutes);
 app.use('/api/baja', bajaRoutes);
 app.use('/api/recatego', recategoRoutes);
 app.use('/api/admin', adminRoutes);
-app.use('/api/pagos', pagosRouter);
+app.use('/api/pagos', pagosRoutes);
 app.use('/api/consultas', consultaRoutes);
 app.use('/api/monotributo', monotributoRoutes);
 
