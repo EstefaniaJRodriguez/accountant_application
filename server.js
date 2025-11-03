@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import pool from './db.js';
 
 // 🔹 Rutas
-import altaRoutes from './routes/AltaMonotributo.js';
+import altaRoutes from './routes/altaMonotributo.js';
 import bajaRoutes from './routes/bajaMonotributo.js';
 import recategoRoutes from './routes/recatego.js';
 import adminRoutes from './routes/adminRoutes.js';
