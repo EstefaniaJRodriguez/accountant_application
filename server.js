@@ -43,10 +43,6 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-
-// =========================
-// 🔸 Middleware
-// =========================
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
