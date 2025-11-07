@@ -1,6 +1,6 @@
 // controllers/solicitudesController.js
 import pool from "../db.js";
-
+ 
 // Obtener todas las solicitudes
 // export const getSolicitudes = async (req, res) => {
 //   try {
