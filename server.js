@@ -24,7 +24,7 @@ const app = express();
 // =========================
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://tu-frontend.netlify.app', // 🔹 reemplazalo con tu URL real en Netlify
+  'https://accountant-application.onrender.com', // 🔹 reemplazalo con tu URL de frontend
 ];
 
 const corsOptions = {
