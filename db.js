@@ -5,7 +5,7 @@ import pg from 'pg';
 const { Pool } = pg;
 
 // ✅ Usa DATABASE_URL si está definida (Render, Supabase, etc.)
-let connectionConfig = {};
+let connectionConfig = {};  
 
 if (process.env.DATABASE_URL) {
   connectionConfig = {
