@@ -10,15 +10,17 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 router.post("/", async (req, res) => {
   const { nombre, email, mensaje } = req.body;
 
+  // Validar campos
   if (!nombre || !email || !mensaje) {
     return res.status(400).json({ message: "Todos los campos son obligatorios" });
   }
 
   try {
-    await resend.emails.send({
-      from: `GEN IMPOSITIVO Website: ${nombre} `, 
-      to: process.env.EMAIL_RECEIVER, // Tu gmail
-      subject: "GEN IMPOSITIVO website: Nueva consulta",
+    // Enviar email
+    const response = await resend.emails.send({
+      from: `GEN IMPOSITIVO Website <${process.env.RESEND_FROM_EMAIL}>`, // debe ser un email válido registrado en Resend
+      to: process.env.EMAIL_RECEIVER, // tu Gmail o el que recibirá la consulta
+      subject: `Nueva consulta de ${nombre} desde GEN IMPOSITIVO Website`,
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9;">
           <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
@@ -36,7 +38,8 @@ router.post("/", async (req, res) => {
         </div>
       `,
     });
-    console.log("Respuesta de Resend:", response);
+
+    console.log("✅ Respuesta de Resend:", response);
 
     res.status(200).json({ message: "Consulta enviada correctamente" });
   } catch (error) {
