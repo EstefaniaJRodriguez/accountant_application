@@ -29,16 +29,20 @@ const allowedOrigins = [
 
 const corsOptions = {
   origin: function (origin, callback) {
-    // permitir requests desde frontend o local
-    if (!origin || allowedOrigins.includes(origin)) {
+    if (!origin) {
+      // permitir Origin null (Render y navegadores)
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(new Error('No permitido por CORS'));
+      callback(new Error('Origen no permitido por CORS'));
     }
   },
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  credentials: true
 };
 
 app.use(cors(corsOptions));
