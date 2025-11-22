@@ -52,8 +52,9 @@ router.post("/", async (req, res) => {
     res.status(200).json({ message: "Consulta enviada correctamente" });
   } catch (error) {
     console.error("Error al enviar el correo:", error);
-    res.status(500).json({ message: "Error al enviar el correo" });
+    res.status(500).json({ message: "Error al enviar el correo", error: error.message });
   }
+  
 });
 
 export default router;
