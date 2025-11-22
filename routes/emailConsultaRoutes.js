@@ -36,6 +36,7 @@ router.post("/", async (req, res) => {
         </div>
       `,
     });
+    console.log("Respuesta de Resend:", response);
 
     res.status(200).json({ message: "Consulta enviada correctamente" });
   } catch (error) {
