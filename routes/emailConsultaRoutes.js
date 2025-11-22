@@ -16,7 +16,7 @@ router.post("/", async (req, res) => {
 
   try {
     await resend.emails.send({
-      from: "GEN IMPOSITIVO Website <no-reply@genimpositivo.com>", 
+      from: `GEN IMPOSITIVO Website: ${nombre} `, 
       to: process.env.EMAIL_RECEIVER, // Tu gmail
       subject: "GEN IMPOSITIVO website: Nueva consulta",
       html: `
