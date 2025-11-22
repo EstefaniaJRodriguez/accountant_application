@@ -1,10 +1,11 @@
 import express from "express";
-import nodemailer from "nodemailer";
+import { Resend } from "resend";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const router = express.Router();
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 router.post("/", async (req, res) => {
   const { nombre, email, mensaje } = req.body;
@@ -14,19 +15,9 @@ router.post("/", async (req, res) => {
   }
 
   try {
-    // Configurar transporte de correo
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS, // contraseña de aplicación
-      },
-    });
-
-    // Contenido del mail con estilos
-    const mailOptions = {
-      from: `"Formulario de Consultas" <${process.env.EMAIL_USER}>`,
-      to: process.env.EMAIL_RECEIVER,
+    await resend.emails.send({
+      from: "GEN IMPOSITIVO Website <no-reply@genimpositivo.com>", 
+      to: process.env.EMAIL_RECEIVER, // Tu gmail
       subject: "GEN IMPOSITIVO website: Nueva consulta",
       html: `
         <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9;">
@@ -44,17 +35,13 @@ router.post("/", async (req, res) => {
           </div>
         </div>
       `,
-    };
-
-    // Enviar mail
-    await transporter.sendMail(mailOptions);
+    });
 
     res.status(200).json({ message: "Consulta enviada correctamente" });
   } catch (error) {
-    console.error("Error al enviar el correo:", error);
+    console.error("❌ Error al enviar el correo:", error);
     res.status(500).json({ message: "Error al enviar el correo", error: error.message });
   }
-  
 });
 
 export default router;
