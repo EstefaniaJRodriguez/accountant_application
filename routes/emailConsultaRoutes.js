@@ -10,36 +10,27 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 router.post("/", async (req, res) => {
   const { nombre, email, mensaje } = req.body;
 
-  // Validar campos
   if (!nombre || !email || !mensaje) {
     return res.status(400).json({ message: "Todos los campos son obligatorios" });
   }
 
   try {
-    // Enviar email
-    const response = await resend.emails.send({
-      from: `GEN IMPOSITIVO Website <${process.env.RESEND_FROM_EMAIL}>`, // debe ser un email válido registrado en Resend
-      to: process.env.EMAIL_RECEIVER, // tu Gmail o el que recibirá la consulta
-      subject: `Nueva consulta de ${nombre} desde GEN IMPOSITIVO Website`,
+    const result = await resend.emails.send({
+      from: `GEN IMPOSITIVO <onboarding@resend.dev>`,
+      // El from SIEMPRE debe ser un dominio verificado o un email permitido
+      reply_to: email, // así podes responderles directo
+      to: process.env.EMAIL_RECEIVER,
+      subject: "GEN IMPOSITIVO website: Nueva consulta",
       html: `
-        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f9f9f9;">
-          <div style="max-width: 600px; margin: auto; background-color: #ffffff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-            <h2 style="color: #1a73e8; text-align: center;">📩 Nueva Consulta</h2>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p><strong>Nombre:</strong> ${nombre}</p>
-            <p><strong>Email:</strong> ${email}</p>
-            <p><strong>Mensaje:</strong></p>
-            <p style="padding: 10px; background-color: #f1f1f1; border-radius: 5px;">${mensaje}</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="text-align: center; font-size: 12px; color: #777;">
-              Este correo fue enviado desde el formulario de consultas del sitio web GEN IMPOSITIVO.
-            </p>
-          </div>
-        </div>
+        <h2>Nueva consulta recibida</h2>
+        <p><strong>Nombre:</strong> ${nombre}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Mensaje:</strong></p>
+        <p>${mensaje}</p>
       `,
     });
 
-    console.log("✅ Respuesta de Resend:", response);
+    console.log("✔ Email enviado con Resend:", result);
 
     res.status(200).json({ message: "Consulta enviada correctamente" });
   } catch (error) {
