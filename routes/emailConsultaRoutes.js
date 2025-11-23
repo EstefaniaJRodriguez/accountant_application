@@ -17,16 +17,33 @@ router.post("/", async (req, res) => {
   try {
     const result = await resend.emails.send({
       from: `GEN IMPOSITIVO <onboarding@resend.dev>`,
-      // El from SIEMPRE debe ser un dominio verificado o un email permitido
-      reply_to: email, // así podes responderles directo
+      reply_to: email,
       to: process.env.EMAIL_RECEIVER,
       subject: "GEN IMPOSITIVO website: Nueva consulta",
       html: `
-        <h2>Nueva consulta recibida</h2>
-        <p><strong>Nombre:</strong> ${nombre}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Mensaje:</strong></p>
-        <p>${mensaje}</p>
+        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px; background-color: #f2f2f2;">
+          <div style="max-width: 600px; margin: auto; background: #fff; padding: 25px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);">
+
+            <h2 style="color: #1a73e8; text-align: center; margin-bottom: 20px;">📩 Nueva Consulta</h2>
+
+            <div style="border-top: 1px solid #eee; margin: 20px 0;"></div>
+
+            <p style="font-size: 16px;"><strong>Nombre:</strong> ${nombre}</p>
+            <p style="font-size: 16px;"><strong>Email:</strong> ${email}</p>
+
+            <p style="font-size: 16px; margin-top: 20px;"><strong>Mensaje:</strong></p>
+            <div style="padding: 15px; background-color: #f8f8f8; border-left: 4px solid #1a73e8; border-radius: 5px; font-size: 15px; line-height: 1.5;">
+              ${mensaje}
+            </div>
+
+            <div style="border-top: 1px solid #eee; margin: 25px 0;"></div>
+
+            <p style="text-align: center; font-size: 12px; color: #777;">
+              Este correo fue enviado automáticamente desde el formulario de consultas del sitio web GEN IMPOSITIVO.
+            </p>
+
+          </div>
+        </div>
       `,
     });
 
