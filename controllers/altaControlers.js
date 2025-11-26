@@ -49,7 +49,7 @@ export const createPreference = async (req, res) => {
           title: "Alta de Monotributo",
           quantity: 1,
           currency_id: "ARS",
-          unit_price: 5//formData.precioGestionExtra + formData.precioTramite
+          unit_price: 35000//formData.precioGestionExtra + formData.precioTramite
         }
       ],
       back_urls: {
