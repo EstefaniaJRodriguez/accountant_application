@@ -24,7 +24,8 @@ const app = express();
 // =========================
 const allowedOrigins = [
   'http://localhost:5173',
-  'https://accountant-application-front.onrender.com', // 🔹 reemplazalo con tu URL de frontend
+  'https://accountant-application-front.onrender.com',
+  'https://www.genimpositivo.com/' // 🔹 reemplazalo con tu URL de frontend
 ];
 
 const corsOptions = {
