@@ -2,7 +2,7 @@ import pool from '../db.js'; // Asegurate que db.js exporte un Pool de pg con ex
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 // ✅ Crear cliente de Mercado Pago con tu access token
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN , sandbox: true }, );
+const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN }, );
 
 export const createPreference = async (req, res) => {
   try {
@@ -38,9 +38,9 @@ export const createPreference = async (req, res) => {
       return res.status(500).json({ error: "No se pudo obtener el ID del trámite" });
     }
 
-    const successUrl = "https://268758491758.ngrok-free.app/pago-exitoso/" + tramiteId;
-    const failureUrl = "https://268758491758.ngrok-free.app/pago-fallido/" + tramiteId;
-    const pendingUrl = "https://268758491758.ngrok-free.app/pago-pendiente/" + tramiteId;
+    const successUrl = "https://www.genimpositivo.com/pago-exitoso/" + tramiteId;
+    const failureUrl = "https://www.genimpositivo.com/pago-fallido/" + tramiteId;
+    const pendingUrl = "https://www.genimpositivo.com/pago-pendiente/" + tramiteId;
 
     // 3️⃣ Preparar preferencia de Mercado Pago
     const preference = {
