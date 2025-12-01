@@ -2,7 +2,7 @@ import pool from '../db.js'; // Asegurate que db.js exporte un Pool de pg con ex
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
 // ✅ Crear cliente de Mercado Pago con tu access token
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN }, );
+const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
 export const createPreference = async (req, res) => {
   try {
@@ -49,7 +49,7 @@ export const createPreference = async (req, res) => {
           title: "Alta de Monotributo",
           quantity: 1,
           currency_id: "ARS",
-          unit_price: 35000//formData.precioGestionExtra + formData.precioTramite
+          unit_price: formData.precioGestionExtra + formData.precioTramite
         }
       ],
       back_urls: {
