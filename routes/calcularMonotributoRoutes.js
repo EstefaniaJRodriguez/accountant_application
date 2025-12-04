@@ -16,16 +16,13 @@ router.get("/categorias", async (req, res) => {
   }
 });
 
-/**
- * Endpoint: POST /api/monotributo/validar
- * Recibe: { categoria, ingresos, tipo }
- * Devuelve: mensaje + monto a pagar o sugerencia de categoría mayor
- */
-router.post("/validar", async (req, res) => {
-  try {
-    const { categoria, ingresos, tipo } = req.body;
 
-    if (!categoria || !ingresos || !tipo) {
+ router.post("/validar", async (req, res) => {
+  try {
+    const { categoria, ingresos, tipo, condicion } = req.body;
+    // condicion = "dependencia" | "jubilado" | "autonomo"
+
+    if (!categoria || !ingresos || !tipo || !condicion) {
       return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
@@ -41,30 +38,79 @@ router.post("/validar", async (req, res) => {
 
     const categoriaDB = result.rows[0];
 
-    // Validar el ingreso con el tope de la categoría
-    if (Number(ingresos) <= Number(categoriaDB.ingresos_brutos)) {
-      const monto =
+    // Validar ingresos dentro del tope
+    if (Number(ingresos) > Number(categoriaDB.ingresos_brutos)) {
+      return res.json({
+        ok: false,
+        mensaje: `El monto ingresado ($${ingresos}) supera el tope de la categoría ${categoria} ($${categoriaDB.ingresos_brutos}). Deberías seleccionar una categoría mayor.`,
+      });
+    }
+
+    let monto = 0;
+
+    // ---------------------------
+    //     CASO 1: RELACIÓN DE DEPENDENCIA
+    // ---------------------------
+    if (condicion === "dependencia") {
+      monto = categoriaDB.aportes_sipa;
+
+      return res.json({
+        ok: true,
+        tipo,
+        condicion,
+        monto,
+        mensaje: `El aporte correspondiente para relación de dependencia es $${monto}.`,
+      });
+    }
+
+    // ---------------------------
+    //     CASO 2: JUBILADO
+    // ---------------------------
+    if (condicion === "jubilado") {
+      if (tipo === "servicios") {
+        monto =
+          Number(categoriaDB.imp_integrado_servicios) +
+          Number(categoriaDB.aportes_obra_social);
+      } else {
+        monto =
+          Number(categoriaDB.imp_integrado_venta) +
+          Number(categoriaDB.aportes_obra_social);
+      }
+
+      return res.json({
+        ok: true,
+        tipo,
+        condicion,
+        monto,
+        mensaje: `El monto estimado para la condición de jubilado es $${monto}.`,
+      });
+    }
+
+    // ---------------------------
+    //     CASO 3: AUTÓNOMO (NORMAL)
+    // ---------------------------
+    if (condicion === "autonomo") {
+      monto =
         tipo === "servicios"
           ? categoriaDB.total_servicios
           : categoriaDB.total_venta;
 
       return res.json({
         ok: true,
-        monto,
         tipo,
+        condicion,
+        monto,
         mensaje: `El monto mensual estimado del monotributo es $${monto}.`,
       });
-    } else {
-      return res.json({
-        ok: false,
-        mensaje: `El monto ingresado ($${ingresos}) supera el tope de la categoría ${categoria} ($${categoriaDB.ingresos_brutos}). 
-        Deberías seleccionar en una categoría mayor.`,
-      });
     }
+
+    return res.status(400).json({ error: "Condición no válida." });
+
   } catch (error) {
     console.error("Error en /api/monotributo/validar:", error);
     res.status(500).json({ error: "Error interno del servidor." });
   }
 });
+
 
 export default router;
