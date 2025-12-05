@@ -15,15 +15,13 @@ import adminRoutes from './routes/adminRoutes.js';
 import pagosRoutes from "./routes/pagosRoutes.js";
 import consultaRoutes from "./routes/emailConsultaRoutes.js";
 import monotributoRoutes from "./routes/calcularMonotributoRoutes.js";
-import verifyToken from './middleware/authMiddleware.js';
+import verifyToken from './middleware/middleware.js';
 import loginRoutes from './routes/login.js';
 
 
 // 🔹 Rutas nuevas de login
 import authRoutes from "./routes/auth.js";
 
-// 🔹 Middleware de autenticación (para rutas protegidas)
-import { authMiddleware } from "./middleware/authMiddleware.js";
 
 const app = express();
 
