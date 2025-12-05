@@ -90,6 +90,7 @@ router.get("/categorias", async (req, res) => {
     //     CASO 3: AUTÓNOMO (NORMAL)
     // ---------------------------
     if (condicion === "autonomo") {
+      console.log(tipo)
       monto =
         tipo === "servicios"
           ? categoriaDB.total_servicios
