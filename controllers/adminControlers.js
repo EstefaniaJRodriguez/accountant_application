@@ -77,4 +77,46 @@ export const getSolicitudes = async (req, res) => {
     console.error("Error obteniendo solicitudes:", error.message);
     res.status(500).json({ error: error.message });
   }
+
+  
+};
+
+
+
+// Actualizar estado de una solicitud
+export const updateEstado = async (req, res) => {
+  const { id } = req.params;
+  const { estado, observaciones } = req.body; // acá viene el id del estado
+
+  try {
+    await pool.query("UPDATE tramites SET estado_actual_id = $1, observaciones = $2 WHERE id = $3", [
+      estado,
+      observaciones,
+      id,
+    ]);
+    res.json({ success: true });
+  } catch (error) {
+    console.error("Error actualizando estado/observaciones:", error);
+    res.status(500).json({ error: "Error al actualizar estado" });
+  }
+};
+
+export const getEstados = async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, nombre FROM estados ORDER BY id");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error obteniendo estados:", error);
+    res.status(500).json({ error: "Error al obtener estados" });
+  }
+};
+
+export const getTiposTramite = async (req, res) => {
+  try {
+    const result = await pool.query("SELECT id, tramite FROM tipos_tramite ORDER BY id ASC");
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Error obteniendo tipos de trámite", error);
+    res.status(500).json({ error: "Error al obtener tipos de trámite" });
+  }
 };
