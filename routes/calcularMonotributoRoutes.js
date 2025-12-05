@@ -92,7 +92,7 @@ router.get("/categorias", async (req, res) => {
     if (condicion === "autonomo") {
       console.log(tipo)
       monto =
-        tipo === "servicios"
+        tipo === "servicio"
           ? categoriaDB.total_servicios
           : categoriaDB.total_venta;
 
