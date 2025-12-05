@@ -73,7 +73,7 @@ pool.connect()
 app.use('/api/alta', altaRoutes);
 app.use('/api/baja', bajaRoutes);
 app.use('/api/recatego', recategoRoutes);
-aapp.use('/api/admin', verifyToken, adminRoutes);
+app.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/consultas', consultaRoutes);
 app.use('/api/monotributo', monotributoRoutes);
