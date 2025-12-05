@@ -7,7 +7,7 @@ import bodyParser from 'body-parser';
 // 🔹 Conexión a la base
 import pool from './db.js';
 
-// 🔹 Rutas
+// 🔹 Rutas existentes
 import altaRoutes from './routes/altaMonotributo.js';
 import bajaRoutes from './routes/bajaMonotributo.js';
 import recategoRoutes from './routes/recatego.js';
@@ -15,6 +15,15 @@ import adminRoutes from './routes/adminRoutes.js';
 import pagosRoutes from "./routes/pagosRoutes.js";
 import consultaRoutes from "./routes/emailConsultaRoutes.js";
 import monotributoRoutes from "./routes/calcularMonotributoRoutes.js";
+import verifyToken from './middleware/authMiddleware.js';
+import loginRoutes from './routes/login.js';
+
+
+// 🔹 Rutas nuevas de login
+import authRoutes from "./routes/auth.js";
+
+// 🔹 Middleware de autenticación (para rutas protegidas)
+import { authMiddleware } from "./middleware/authMiddleware.js";
 
 const app = express();
 
@@ -26,13 +35,12 @@ const allowedOrigins = [
   'http://localhost:5173',
   'https://accountant-application-front.onrender.com',
   'https://www.genimpositivo.com/',
-  'https://www.genimpositivo.com' // 🔹 reemplazalo con tu URL de frontend
+  'https://www.genimpositivo.com'
 ];
 
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) {
-      // permitir Origin null (Render y navegadores)
       return callback(null, true);
     }
 
@@ -62,15 +70,24 @@ pool.connect()
 
 
 // =========================
-// 🔸 Rutas API
+// 🔸 Rutas API EXISTENTES
 // =========================
 app.use('/api/alta', altaRoutes);
 app.use('/api/baja', bajaRoutes);
 app.use('/api/recatego', recategoRoutes);
-app.use('/api/admin', adminRoutes);
+aapp.use('/api/admin', verifyToken, adminRoutes);
 app.use('/api/pagos', pagosRoutes);
 app.use('/api/consultas', consultaRoutes);
 app.use('/api/monotributo', monotributoRoutes);
+app.use('/api/login', loginRoutes);
+
+
+
+// =========================
+// 🔸 Rutas nuevas: LOGIN
+// =========================
+app.use("/api", authRoutes);  
+// Esto habilita: POST /api/login
 
 
 // =========================

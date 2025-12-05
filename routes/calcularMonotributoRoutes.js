@@ -67,7 +67,7 @@ router.get("/categorias", async (req, res) => {
     //     CASO 2: JUBILADO
     // ---------------------------
     if (condicion === "jubilado") {
-      if (tipo === "servicios") {
+      if (tipo === "servicio") {
         monto =
           Number(categoriaDB.imp_integrado_servicios) +
           Number(categoriaDB.aportes_obra_social);
