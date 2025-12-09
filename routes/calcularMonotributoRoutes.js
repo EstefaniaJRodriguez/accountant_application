@@ -3,6 +3,13 @@ import pool from "../db.js"; //
 
 const router = express.Router();
 
+let aportesSipaCategoriaA = null;
+
+const result = await pool.query(
+  "SELECT aportes_sipa FROM categorias_monotributo WHERE categoria = 'A'"
+);
+ aportesSipaCategoriaA + result;
+
 // ✅ Obtener todas las categorías desde la base de datos
 router.get("/categorias", async (req, res) => {
   try {
@@ -76,11 +83,11 @@ router.get("/categorias", async (req, res) => {
         monto =
           Number(categoriaDB.imp_integrado_servicios) 
           +
-          Number(categoriaDB.aportes_sipa);
+          Number(aportesSipaCategoriaA);
       } else {
         monto =
           Number(categoriaDB.imp_integrado_venta) +
-          Number(categoriaDB.aportes_sipa);
+          Number(aportesSipaCategoriaA);
       }
 
       return res.json({
