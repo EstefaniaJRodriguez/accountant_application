@@ -51,8 +51,13 @@ router.get("/categorias", async (req, res) => {
     // ---------------------------
     //     CASO 1: RELACIÓN DE DEPENDENCIA
     // ---------------------------
+
     if (condicion === "dependencia") {
-      monto = categoriaDB.aportes_sipa;
+      monto =
+        tipo === "servicio"
+          ? categoriaDB.imp_integrado_servicios
+          : categoriaDB.imp_integrado_venta;
+
 
       return res.json({
         ok: true,
@@ -69,12 +74,13 @@ router.get("/categorias", async (req, res) => {
     if (condicion === "jubilado") {
       if (tipo === "servicio") {
         monto =
-          Number(categoriaDB.imp_integrado_servicios) +
-          Number(categoriaDB.aportes_obra_social);
+          Number(categoriaDB.imp_integrado_servicios) 
+          +
+          Number(categoriaDB.aportes_sipa);
       } else {
         monto =
           Number(categoriaDB.imp_integrado_venta) +
-          Number(categoriaDB.aportes_obra_social);
+          Number(categoriaDB.aportes_sipa);
       }
 
       return res.json({
