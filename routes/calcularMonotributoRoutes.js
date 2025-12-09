@@ -1,16 +1,47 @@
 import express from "express";
-import pool from "../db.js"; // 
+import pool from "../db.js";
 
 const router = express.Router();
 
+// 🔹 Variable donde guardaremos el valor
 let aportesSipaCategoriaA = null;
 
-const result = await pool.query(
-  "SELECT aportes_sipa FROM categorias_monotributo WHERE categoria = 'A'"
-);
- aportesSipaCategoriaA + result;
+// 🔹 Función segura para obtener aportes_sipa categoría A
+async function obtenerAportesSipaCategoriaA() {
+  try {
+    // Si ya está cargado y es un número válido → lo usamos
+    if (aportesSipaCategoriaA !== null && !isNaN(aportesSipaCategoriaA)) {
+      return aportesSipaCategoriaA;
+    }
 
-// ✅ Obtener todas las categorías desde la base de datos
+    // Si no, lo consultamos
+    const result = await pool.query(
+      "SELECT aportes_sipa FROM categorias_monotributo WHERE categoria = 'A'"
+    );
+
+    if (result.rows.length > 0) {
+      const valor = Number(result.rows[0].aportes_sipa);
+
+      if (!isNaN(valor)) {
+        aportesSipaCategoriaA = valor;
+        return valor;
+      }
+    }
+
+    console.error("Error: aportes_sipa de categoría A no es un número válido");
+    return 0; // fallback seguro
+
+  } catch (err) {
+    console.error("Error al obtener aportes_sipa categoría A:", err);
+    return 0; // fallback
+  }
+}
+
+// -----------------------------------------------
+// RUTAS
+// -----------------------------------------------
+
+// Obtener categorías
 router.get("/categorias", async (req, res) => {
   try {
     const result = await pool.query(
@@ -23,17 +54,15 @@ router.get("/categorias", async (req, res) => {
   }
 });
 
-
- router.post("/validar", async (req, res) => {
+// Validar categoría
+router.post("/validar", async (req, res) => {
   try {
     const { categoria, ingresos, tipo, condicion } = req.body;
-    // condicion = "dependencia" | "jubilado" | "autonomo"
 
     if (!categoria || !ingresos || !tipo || !condicion) {
       return res.status(400).json({ error: "Faltan datos requeridos." });
     }
 
-    // Buscar la categoría en la base de datos
     const result = await pool.query(
       "SELECT * FROM categorias_monotributo WHERE categoria = $1",
       [categoria]
@@ -45,7 +74,6 @@ router.get("/categorias", async (req, res) => {
 
     const categoriaDB = result.rows[0];
 
-    // Validar ingresos dentro del tope
     if (Number(ingresos) > Number(categoriaDB.ingresos_brutos)) {
       return res.json({
         ok: false,
@@ -55,16 +83,14 @@ router.get("/categorias", async (req, res) => {
 
     let monto = 0;
 
-    // ---------------------------
-    //     CASO 1: RELACIÓN DE DEPENDENCIA
-    // ---------------------------
-
+    // -------------------------------------------
+    //  CASO 1: Relación de dependencia
+    // -------------------------------------------
     if (condicion === "dependencia") {
       monto =
         tipo === "servicio"
           ? categoriaDB.imp_integrado_servicios
           : categoriaDB.imp_integrado_venta;
-
 
       return res.json({
         ok: true,
@@ -75,19 +101,20 @@ router.get("/categorias", async (req, res) => {
       });
     }
 
-    // ---------------------------
-    //     CASO 2: JUBILADO
-    // ---------------------------
+    // -------------------------------------------
+    //  CASO 2: Jubilado
+    // -------------------------------------------
     if (condicion === "jubilado") {
+      const aportesA = await obtenerAportesSipaCategoriaA();
+
       if (tipo === "servicio") {
         monto =
-          Number(categoriaDB.imp_integrado_servicios) 
-          +
-          Number(aportesSipaCategoriaA);
+          Number(categoriaDB.imp_integrado_servicios) +
+          Number(aportesA);
       } else {
         monto =
           Number(categoriaDB.imp_integrado_venta) +
-          Number(aportesSipaCategoriaA);
+          Number(aportesA);
       }
 
       return res.json({
@@ -95,16 +122,14 @@ router.get("/categorias", async (req, res) => {
         tipo,
         condicion,
         monto,
-        aportesSipaCategoriaA,
         mensaje: `El monto estimado para la condición de jubilado es $${monto}.`,
       });
     }
 
-    // ---------------------------
-    //     CASO 3: AUTÓNOMO (NORMAL)
-    // ---------------------------
+    // -------------------------------------------
+    //  CASO 3: Autónomo
+    // -------------------------------------------
     if (condicion === "autonomo") {
-      console.log(tipo)
       monto =
         tipo === "servicio"
           ? categoriaDB.total_servicios
@@ -126,6 +151,5 @@ router.get("/categorias", async (req, res) => {
     res.status(500).json({ error: "Error interno del servidor." });
   }
 });
-
 
 export default router;
