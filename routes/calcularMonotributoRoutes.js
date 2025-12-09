@@ -95,6 +95,7 @@ router.get("/categorias", async (req, res) => {
         tipo,
         condicion,
         monto,
+        aportesSipaCategoriaA,
         mensaje: `El monto estimado para la condición de jubilado es $${monto}.`,
       });
     }
