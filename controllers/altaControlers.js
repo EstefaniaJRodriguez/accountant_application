@@ -1,18 +1,18 @@
-import pool from '../db.js'; // Asegurate que db.js exporte un Pool de pg con export default
+import pool from "../db.js";
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
-
-// ✅ Crear cliente de Mercado Pago con tu access token
-const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
+// Cliente Mercado Pago
+const client = new MercadoPagoConfig({
+  accessToken: process.env.MP_ACCESS_TOKEN,
+});
 
 console.log("MP_ACCESS_TOKEN existe?:", !!process.env.MP_ACCESS_TOKEN);
-
 
 export const createPreference = async (req, res) => {
   try {
     const formData = req.body;
 
-    // 1️⃣ Insertar el trámite en la base
+    // 1️⃣ Insertar trámite
     const query = `
       INSERT INTO tramites (
         nombre, mail, cuit, clave_fiscal, tipo_tramite, estado_actual_id, datos, estado_pago
@@ -20,20 +20,18 @@ export const createPreference = async (req, res) => {
       VALUES ($1,$2,$3,$4,$5,$6,$7,'N')
       RETURNING id
     `;
+
     const values = [
       formData.nombre,
       formData.mail,
       formData.cuit,
       formData.claveFiscal,
-      1,       // tipo_tramite
-      3,         // estado_actual_id
-      JSON.stringify(formData)
+      1,
+      3,
+      JSON.stringify(formData),
     ];
 
     const result = await pool.query(query, values);
-
-    // 2️⃣ Revisar que realmente se creó y obtener el ID
-    console.log("Resultado INSERT:", result.rows);
     const tramiteId = result.rows[0]?.id;
 
     console.log("Tramite ID:", tramiteId);
@@ -42,42 +40,50 @@ export const createPreference = async (req, res) => {
       return res.status(500).json({ error: "No se pudo obtener el ID del trámite" });
     }
 
-    const successUrl = "https://www.genimpositivo.com/pago-exitoso/" + tramiteId;
-    const failureUrl = "https://www.genimpositivo.com/pago-fallido/" + tramiteId;
-    const pendingUrl = "https://www.genimpositivo.com/pago-pendiente/" + tramiteId;
+    // 2️⃣ URLs
+    const successUrl = `https://www.genimpositivo.com/pago-exitoso/${tramiteId}`;
+    const failureUrl = `https://www.genimpositivo.com/pago-fallido/${tramiteId}`;
+    const pendingUrl = `https://www.genimpositivo.com/pago-pendiente/${tramiteId}`;
 
+    // 3️⃣ Total
     const total =
-  Number(formData.precioGestionExtra) + Number(formData.precioTramite);
+      Number(formData.precioGestionExtra) + Number(formData.precioTramite);
 
-    // 3️⃣ Preparar preferencia de Mercado Pago
+    if (isNaN(total)) {
+      return res.status(400).json({ error: "Monto inválido" });
+    }
+
+    // 4️⃣ Preferencia
     const preference = {
       items: [
         {
           title: "Alta de Monotributo",
           quantity: 1,
           currency_id: "ARS",
-          unit_price: total
-        }
+          unit_price: total,
+        },
       ],
       back_urls: {
         success: successUrl,
         failure: failureUrl,
-        pending: pendingUrl
+        pending: pendingUrl,
       },
-      auto_return: "approved"
+      auto_return: "approved",
     };
 
-    console.log("URLs de retorno:", preference.back_urls);
+    console.log("Preference final:", preference);
 
-        console.log("Preference final:", preference);
-
-    // 4️⃣ Crear la preferencia con la nueva SDK
+    // 5️⃣ Crear preferencia
     const preferenceInstance = new Preference(client);
     const mpResponse = await preferenceInstance.create({ body: preference });
-    
-    res.json({ preferenceId: mpResponse.body.id });
+
+    console.log("Respuesta MP:", mpResponse);
+
+    // ✅ ACÁ ESTABA EL ERROR
+    res.json({ preferenceId: mpResponse.id });
+
   } catch (error) {
     console.error("Error en createPreference:", error);
-    res.status(500).json({ error: "Error al crear la preferencia" });
+    res.status(500).json({ error: error.message });
   }
 };
