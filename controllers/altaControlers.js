@@ -5,6 +5,9 @@ import { MercadoPagoConfig, Preference } from "mercadopago";
 // ✅ Crear cliente de Mercado Pago con tu access token
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
+console.log("MP_ACCESS_TOKEN existe?:", !!process.env.MP_ACCESS_TOKEN);
+
+
 export const createPreference = async (req, res) => {
   try {
     const formData = req.body;
