@@ -1,6 +1,7 @@
 import pool from '../db.js'; // Asegurate que db.js exporte un Pool de pg con export default
 import { MercadoPagoConfig, Preference } from "mercadopago";
 
+
 // ✅ Crear cliente de Mercado Pago con tu access token
 const client = new MercadoPagoConfig({ accessToken: process.env.MP_ACCESS_TOKEN });
 
@@ -42,6 +43,9 @@ export const createPreference = async (req, res) => {
     const failureUrl = "https://www.genimpositivo.com/pago-fallido/" + tramiteId;
     const pendingUrl = "https://www.genimpositivo.com/pago-pendiente/" + tramiteId;
 
+    const total =
+  Number(formData.precioGestionExtra) + Number(formData.precioTramite);
+
     // 3️⃣ Preparar preferencia de Mercado Pago
     const preference = {
       items: [
@@ -49,7 +53,7 @@ export const createPreference = async (req, res) => {
           title: "Alta de Monotributo",
           quantity: 1,
           currency_id: "ARS",
-          unit_price: formData.precioGestionExtra + formData.precioTramite
+          unit_price: total
         }
       ],
       back_urls: {
@@ -67,12 +71,8 @@ export const createPreference = async (req, res) => {
     // 4️⃣ Crear la preferencia con la nueva SDK
     const preferenceInstance = new Preference(client);
     const mpResponse = await preferenceInstance.create({ body: preference });
-
-    console.log("Respuesta Mercado Pago:", mpResponse);
-
-    // 5️⃣ Enviar el ID de la preferencia al frontend
-    res.json({ preferenceId: mpResponse.id });
-
+    
+    res.json({ preferenceId: mpResponse.body.id });
   } catch (error) {
     console.error("Error en createPreference:", error);
     res.status(500).json({ error: "Error al crear la preferencia" });
