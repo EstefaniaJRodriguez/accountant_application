@@ -3,7 +3,7 @@ import pool from "../db.js";
 
 export const getSolicitudes = async (req, res) => {
   try {
-    const { estado, tipo_tramite, cuit, email } = req.query;
+    const { estado, tipo_tramite, cuit, email, estado_pago } = req.query;
 
     let baseQuery = `
       SELECT 
@@ -14,29 +14,38 @@ export const getSolicitudes = async (req, res) => {
         t.datos,
         t.fecha,
         t.observaciones,
+        t.estado_pago,
         e.nombre AS estado_nombre,
         tp.tramite AS tipo_tramite_nombre
       FROM tramites t
       LEFT JOIN estados e ON t.estado_actual_id = e.id
       LEFT JOIN tipos_tramite tp ON t.tipo_tramite = tp.id
-      WHERE t.estado_pago = 'Y'
+      WHERE 1=1
     `;
 
     const conditions = [];
     const values = [];
 
+    if (estado_pago) {
+      values.push(estado_pago);
+      conditions.push(`t.estado_pago = $${values.length}`);
+    }
+
     if (estado) {
       values.push(estado);
       conditions.push(`t.estado_actual_id = $${values.length}`);
     }
+
     if (tipo_tramite) {
       values.push(tipo_tramite);
       conditions.push(`t.tipo_tramite = $${values.length}`);
     }
+
     if (cuit) {
       values.push(`%${cuit}%`);
       conditions.push(`t.cuit LIKE $${values.length}`);
     }
+
     if (email) {
       values.push(`%${email}%`);
       conditions.push(`t.mail LIKE $${values.length}`);
@@ -55,12 +64,9 @@ export const getSolicitudes = async (req, res) => {
 
       try {
         if (row.datos) {
-          // 🔹 Si ya es objeto, usarlo tal cual
           if (typeof row.datos === "object") {
             datosExtra = row.datos;
-          }
-          // 🔹 Si es string, parsear
-          else if (typeof row.datos === "string") {
+          } else if (typeof row.datos === "string") {
             datosExtra = JSON.parse(row.datos);
           }
         }
@@ -68,8 +74,10 @@ export const getSolicitudes = async (req, res) => {
         console.error(`❌ Error parseando JSON en solicitud ${row.id}:`, error);
       }
 
-      // 🔹 Combinar datos base + datos extra
-      return { ...row, ...datosExtra };
+      return {
+        ...row,
+        ...datosExtra,
+      };
     });
 
     res.json(solicitudes);
@@ -77,23 +85,19 @@ export const getSolicitudes = async (req, res) => {
     console.error("Error obteniendo solicitudes:", error.message);
     res.status(500).json({ error: error.message });
   }
-
-  
 };
 
-
-
-// Actualizar estado de una solicitud
+// 🔹 Actualizar estado + observaciones (SIN CAMBIOS)
 export const updateEstado = async (req, res) => {
   const { id } = req.params;
-  const { estado, observaciones } = req.body; // acá viene el id del estado
+  const { estado, observaciones } = req.body;
 
   try {
-    await pool.query("UPDATE tramites SET estado_actual_id = $1, observaciones = $2 WHERE id = $3", [
-      estado,
-      observaciones,
-      id,
-    ]);
+    await pool.query(
+      "UPDATE tramites SET estado_actual_id = $1, observaciones = $2 WHERE id = $3",
+      [estado, observaciones, id]
+    );
+
     res.json({ success: true });
   } catch (error) {
     console.error("Error actualizando estado/observaciones:", error);
@@ -103,7 +107,9 @@ export const updateEstado = async (req, res) => {
 
 export const getEstados = async (req, res) => {
   try {
-    const result = await pool.query("SELECT id, nombre FROM estados ORDER BY id");
+    const result = await pool.query(
+      "SELECT id, nombre FROM estados ORDER BY id"
+    );
     res.json(result.rows);
   } catch (error) {
     console.error("Error obteniendo estados:", error);
@@ -113,7 +119,9 @@ export const getEstados = async (req, res) => {
 
 export const getTiposTramite = async (req, res) => {
   try {
-    const result = await pool.query("SELECT id, tramite FROM tipos_tramite ORDER BY id ASC");
+    const result = await pool.query(
+      "SELECT id, tramite FROM tipos_tramite ORDER BY id ASC"
+    );
     res.json(result.rows);
   } catch (error) {
     console.error("Error obteniendo tipos de trámite", error);
