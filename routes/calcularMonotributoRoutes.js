@@ -110,11 +110,11 @@ router.post("/validar", async (req, res) => {
       if (tipo === "servicio") {
         monto =
           Number(categoriaDB.imp_integrado_servicios) +
-          Number(aportesA);
+          Number(aportesA) + 450;
       } else {
         monto =
           Number(categoriaDB.imp_integrado_venta) +
-          Number(aportesA);
+          Number(aportesA) + 450;
       }
 
       return res.json({
